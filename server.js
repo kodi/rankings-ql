@@ -8,7 +8,7 @@ var port       = 4444;
 var connection = mysql.createConnection({
     host     : '127.0.0.1',
     user     : 'root',
-    password : '',
+    password : 'd0ct0rwh0',
     database : 'ratings_test'
 });
 
