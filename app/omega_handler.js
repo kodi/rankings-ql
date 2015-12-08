@@ -70,7 +70,7 @@ router.get('/omega/elo/:ids', function(req, res) {
                     var p = generatePlayerObject('', {
                         player_id : id,
                         num_games: 0,
-                        elo :250
+                        rank :250
                     });
                     players.push(p);
                 }
