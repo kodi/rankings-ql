@@ -17,17 +17,21 @@ function generatePlayerObject(player, defaults){
     return p;
 }
 
+var LOWER_CAP = 200;
+var UPPER_CAP = 750;
+var NEW_PLAYER = 200;
+
 function applyCap(players){
 
     //apply the cap
     _.each(players, function(player){
 
-        if(player.ctf.elo < 250) {
-            player.ctf.elo = 250;
+        if(player.ctf.elo < LOWER_CAP) {
+            player.ctf.elo = LOWER_CAP;
         }
 
-        if(player.ctf.elo > 750) {
-            player.ctf.elo = 750;
+        if(player.ctf.elo > UPPER_CAP) {
+            player.ctf.elo = UPPER_CAP;
         }
     });
 
@@ -70,7 +74,7 @@ router.get('/omega/elo/:ids', function(req, res) {
                     var p = generatePlayerObject('', {
                         player_id : id,
                         num_games: 0,
-                        rank :275
+                        rank :NEW_PLAYER
                     });
                     players.push(p);
                 }
