@@ -51,11 +51,11 @@ router.get('/omega/elo/:ids', function(req, res) {
         //apply the cap
         _.each(players, function(player){
 
-            if(player.ctf.elo > 250) {
+            if(player.ctf.elo < 250) {
                 player.ctf.elo = 250;
             }
 
-            if(player.ctf.elo < 750) {
+            if(player.ctf.elo > 750) {
                 player.ctf.elo = 750;
             }
 
