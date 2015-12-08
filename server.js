@@ -3,14 +3,11 @@ var mysql      = require('mysql');
 var chalk      = require('chalk');
 var expressWinston = require('express-winston');
 var winston     = require('winston');        // for transports.Console
+
 var app        = express();                 // define our app using express
 var port       = 4444;
 
-
 var omega_handler = require('./app/omega_handler');
-
-
-
 
 // express-winston logger makes sense BEFORE the router.
 app.use(expressWinston.logger({
