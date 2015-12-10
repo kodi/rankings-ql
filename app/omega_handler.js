@@ -10,6 +10,15 @@ var LOWER_CAP = 200;
 var UPPER_CAP = 750;
 var NEW_PLAYER = 200;
 
+
+/**
+ * ----------------------------------------------------------
+ * generate player object for response
+ * ----------------------------------------------------------
+ * @param player
+ * @param defaults
+ * @returns {{steamid: *, ctf: {elo: number, games: (number|*)}}}
+ */
 function generatePlayerObject(player, defaults) {
     return {
         steamid: player.player_id   || defaults.player_id,
@@ -21,6 +30,12 @@ function generatePlayerObject(player, defaults) {
 }
 
 
+/**
+ * ----------------------------------------------------------
+ * Applying lower and upper cap
+ * ----------------------------------------------------------
+ * @param players
+ */
 function applyCap(players) {
 
     _.each(players, function (player) {
@@ -36,7 +51,11 @@ function applyCap(players) {
 }
 
 
-
+/**
+ * ----------------------------------------------------------
+ * ELO HANDLER
+ * ----------------------------------------------------------
+ */
 router.get('/omega/elo/:ids', function (req, res) {
 
     logger.logRequest(req);

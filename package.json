@@ -17,6 +17,7 @@
     "mstring": "^0.1.2",
     "mysql": "^2.9.0",
     "node-datetime": "^0.1.5",
+    "pretty-hrtime": "^1.0.1",
     "q": "^1.4.1",
     "winston": "^2.1.1"
   }

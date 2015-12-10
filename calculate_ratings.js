@@ -1,54 +1,57 @@
-var _       = require("lodash");
-var fs      = require("fs");
+var _ = require("lodash");
+var fs = require("fs");
 var Q = require('q');
 var chalk = require('chalk');
-var mysql      = require('mysql');
-var M = require('mstring')
+var mysql = require('mysql');
+var M = require('mstring');
+var prettyHrtime = require('pretty-hrtime');
 
-var connection = mysql.createConnection({
-    host     : '127.0.0.1',
-    user     : 'root',
-    password : '',
-    database : 'ratings_test'
-});
+var pool = require('./app/db');
+var Config      = require('./config/config');
+
 
 var RES = [];
 var rating_promises = [];
+var connection = mysql.createConnection(Config.db);
 
-connection.query('select count(id) as num_games, M.`player_id`, M.`nick` FROM `qlstats_matches` as M group by  M.`player_id`')
-    .on('result', function (p) {
+var PLAYER_Q = 'select count(id) as num_games, M.`player_id`, M.`nick` FROM `qlstats_matches_details` as M group by  M.`player_id`';
+
+var firstQueryStart = process.hrtime();
+
+connection.query(PLAYER_Q)
+    .on('result', function (_playerResult) {
+
 
         var QUERY = `SELECT(
-                ROUND (
-                    AVG (
-                        ((damage_given_adjusted / damage_taken) *
-                        ( score +(( damage_given_adjusted / 1000 ) * 50))) /
-                        ( time / 1200) + win * 300
-                    )/ 2.35
-                )
-            ) AS rating FROM (
+            ROUND (
+                AVG (
+                    ((damage_given_adjusted / damage_taken) *
+                    ( score +(( damage_given_adjusted / 1000 ) * 50))) /
+                    ( time / 1200) + win * 300
+                )/ 2.35
+            )
+        ) AS rating FROM (
 
-                SELECT * FROM qlstats_matches  AS T
-            WHERE T.player_id = '${p.player_id}'
-            AND
-                time > 600
+            SELECT * FROM qlstats_matches_details  AS T
+            WHERE T.player_id = ${_playerResult.player_id}
+            AND time > 600
             ORDER BY date DESC LIMIT 50
-            ) AS tbl `;
+        ) AS tbl `;
 
         var deferred = Q.defer();
 
-        connection.query(QUERY).on('result', function(r){
-            //if (r.rating !== null && p.num_games >= 10){
+        connection.query(QUERY).on('result', function (_ratingResult) {
 
-                RES.push({
-                    rating:r.rating,
-                    nick : p.nick,
-                    num_games: p.num_games,
-                    id: p.player_id
-                });
+            //if (r.rating !== null && _playerResult.num_games >= 10){
+            RES.push({
+                rating: _ratingResult.rating,
+                nick: _playerResult.nick,
+                num_games: _playerResult.num_games,
+                id: _playerResult.player_id
+            });
             //}
 
-        }).on('end', function(){
+        }).on('end', function () {
             deferred.resolve();
         });
 
@@ -57,53 +60,95 @@ connection.query('select count(id) as num_games, M.`player_id`, M.`nick` FROM `q
         );
 
 
-    }).on('end', function(){
-        //connection.end();
+    })
+    .on('end', function () {
 
-        Q.allSettled(rating_promises).then(function(){
+        console.log("Get all players: " + chalk.blue(prettyHrtime(process.hrtime(firstQueryStart))));
+        Q.allSettled(rating_promises).then(function () {
 
-            console.log('ALL ENDED');
-            insertRatings(RES);
+            console.log('ALL CALCULATION ENDED');
 
-            console.log('[ TOP ] -------------------------------');
-            var data = _.sortByOrder(RES, ['rating'],['desc']);
-            var i = 0;
-            _.slice(data, 0, 50).filter(function(p){
-                //console.log(p);
-                i++;
-                console.log("   "+ i + "\trating:" + p.rating +"\tnum_games:"+ p.num_games  + "\t" + p.nick);
-            });
+            var insertsTime = process.hrtime();
+            var inserts = insertRatings(RES, connection);
+
+            Q.allSettled(inserts).then(function(){
+
+                console.log("ALL INSERTS ENDED: " + chalk.blue(prettyHrtime(process.hrtime(insertsTime))));
 
 
-            console.log('[ BOTTOM ] -------------------------------');
-            var data2 = _.sortByOrder(RES, ['rating'],['asc']);
-            _.slice(data2, 0, 20).filter(function(p){
-                //console.log(p);
-                console.log("rating:" + p.rating +"\tnum_games:"+ p.num_games  + "\t" + p.nick);
+                console.log('RELEASING CONNECTION');
+                connection.end();
             });
 
         });
 
-        console.log('END');
+
     });
 
 
-function insertRatings(RES) {
+/**
+ * ----------------------------------------------------------
+ * ----------------------------------------------------------
+ * @param RES
+ * @param connection
+ * @returns {Array}
+ */
+function insertRatings(RES, connection) {
 
-    _.each(RES, function(player){
+    var allInsertPromises = [];
 
-        var rating = 250;
+    _.each(RES, function (player) {
+
+        var deferred = Q.defer();
+        var rating = 0;
+
         if (player.rating !== null) {
             rating = player.rating;
         }
 
-        connection.query('INSERT INTO player_rank (`player_id`, `rank`, `num_games`) VALUES (?, ?, ?)', [player.id, rating, player.num_games])
-        .on('end', function(){
+        var INSERT_Q = 'INSERT INTO `player_rank` (`rank`, `num_games`, `player_id`) VALUES (?, ?, ?)';
+        var UPDATE_Q = 'UPDATE `player_rank` SET `rank`=?, `num_games`=? WHERE `player_id`=? ';
 
-            console.log('inserted for player: '+ chalk.red(player.nick) + " " +chalk.green(player.rating));
-        })
+        var query = INSERT_Q;
+        var action = 'inserted';
+
+        var extra = '';
+
+        connection.query("SELECT * FROM `player_rank` WHERE `player_id`=?", [player.id], function(err,data){
+
+            if(player.rating === null){
+                player.rating = 0;
+            }
+
+            if (typeof  data[0] !== 'undefined') {
+                query = UPDATE_Q;
+                action = 'updated';
+                extra = " (was: " + chalk.yellow(data[0].rank) + ") ";
+            }
+
+            if(action === 'inserted'  || ( action === 'updated' && data[0].rank != player.rating)) {
+                //if rank changed or new player - update
+                connection.query(query, [rating, player.num_games, player.id])
+                    .on('end', function () {
+                        console.log(action + " rating " + chalk.green(player.rating) + extra + " for player: " + chalk.red(player.nick));
+                        deferred.resolve();
+                    });
+
+            } else {
+                //nothing changed, skip
+                console.log("no change for player: " + chalk.red(player.nick));
+                deferred.resolve();
+            }
+
+        });
+
+
+
+        allInsertPromises.push(deferred.promise);
 
     });
+
+    return allInsertPromises;
 
 
 }
