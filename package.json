@@ -19,6 +19,7 @@
     "node-datetime": "^0.1.5",
     "pretty-hrtime": "^1.0.1",
     "q": "^1.4.1",
+    "request": "^2.67.0",
     "winston": "^2.1.1"
   }
 }
