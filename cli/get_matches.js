@@ -41,6 +41,9 @@ api.loadRemote(date, function (data) {
 
             if (results.length > 0) {
                 LOG.logOk('Game ' + file + ' already in DB');
+                if ((index + 1) >= l) {
+                    connection.end()
+                }
             } else {
 
                 model = new MatchResultsModel();
