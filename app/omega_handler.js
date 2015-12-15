@@ -68,7 +68,7 @@ router.get('/omega/elo/:ids', function (req, res) {
 
     pool.getConnection(function (err, connection) {
         // Use the connection
-        connection.query("SELECT * FROM player_rank where player_id IN (?)", [IN], function (err, result) {
+        connection.query("SELECT * FROM player_rank where player_id IN ( " + IN + " )",  function (err, result) {
 
             var playerIndex = {};
 
