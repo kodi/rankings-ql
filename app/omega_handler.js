@@ -4,6 +4,8 @@ var chalk = require('chalk');
 var _ = require('lodash');
 var logger = require('./log');
 
+var moment = require('moment');
+
 var router = express.Router();              // get an instance of the express Router
 
 var LOWER_CAP = 200;
@@ -98,5 +100,44 @@ router.get('/omega/elo/:ids', function (req, res) {
         });
     });
 });
+
+router.get('/omega/seen/:id', function (req, res) {
+
+    var ids = req.params.id;
+
+    pool.getConnection(function (err, connection) {
+
+        // Use the connection
+
+
+        var QUERY = 'select `date`, `game_id`,`nick` from `qlstats_matches_details` ';
+        QUERY += 'WHERE `player_id` = ? ';
+
+        QUERY += 'ORDER BY `date` DESC ';
+        QUERY += 'LIMIT 0,1';
+
+
+        connection.query(QUERY, [ids], function (err, result) {
+
+            if (! err) {
+                var start = moment.unix(result[0].date);
+                var end = moment();
+                var diff = moment.duration(end - start).humanize();
+
+                var out = {};
+                out.gid = result[0].game_id;
+                out.last_game_relative = diff;
+                out.last_nick = result[0].nick;
+                out.last_game_end_timestamp = result[0].date;
+
+                res.send({data: out});
+            }
+
+            connection.release();
+
+        });
+    });
+});
+
 
 module.exports = router;

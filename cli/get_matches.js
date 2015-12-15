@@ -18,16 +18,16 @@ var LoopArray = require('../lib/arr_loop');
 
 //step 1, read all files
 
-var date = '2015-12-12';
+var date = '2015-12-14';
 var api = new QlstatsApi();
 api.loadRemote(date, function (data) {
 
 
     var model = new MatchResultsModel();
 
-    var slice = _.slice(data.files, 1153 + 1026 + 700 + 1000, data.files.length);
-    //var allGames = data.files;
-    var allGames = slice;
+    //var slice = _.slice(data.files, 1153 + 1026 + 700 + 1000, data.files.length);
+    var allGames = data.files;
+    //var allGames = slice;
     var l = allGames.length;
 
     LoopArray(allGames, {iter :function (file, index) {
