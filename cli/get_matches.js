@@ -40,7 +40,7 @@ api.loadRemote(date, function (data) {
                 return getRealmServerId(model);
             })
             .then(function (serverData) {
-                processAcceptedMatch(model, serverData, connection);
+                return processAcceptedMatch(model, serverData, connection);
             }, function(err) { LOG.logErr(err)})
             .then(function(){
                 if ((index + 1) >= l){
@@ -59,7 +59,7 @@ api.loadRemote(date, function (data) {
 
 
 function processAcceptedMatch(model, serverData, dbConnection) {
-
+    var df = Q.defer();
     getMatchDBStatus(model, dbConnection)
         .then(function(status){
 
@@ -68,8 +68,14 @@ function processAcceptedMatch(model, serverData, dbConnection) {
         })
         .then(function(data){
                 LOG.logOk(data);
-        }, function(err) { LOG.logErr(err); });
+                df.resolve();
+        }, function(err) {
+            LOG.logErr(err);
+            df.reject(err);
+        });
 
+
+    return df.promise;
 
 }
 
