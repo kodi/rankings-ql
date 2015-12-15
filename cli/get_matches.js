@@ -1,7 +1,7 @@
 var glob = require("glob");
 var _ = require("lodash");
 var fs = require("fs");
-var Q = require('q');
+var Q = require('Q');
 var chalk = require('chalk');
 var mysql = require('mysql');
 var util = require('util');
@@ -18,7 +18,7 @@ var LoopArray = require('../lib/arr_loop');
 
 //step 1, read all files
 
-var date = '2015-12-14';
+var date = '2015-12-15';
 var api = new QlstatsApi();
 api.loadRemote(date, function (data) {
 
