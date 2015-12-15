@@ -66,7 +66,7 @@ api.loadRemote(date, function (data) {
 
     }, end: function(){
 
-    }}, 700, false);
+    }}, 500, false);
 
 });
 

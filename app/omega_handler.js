@@ -22,6 +22,13 @@ var NEW_PLAYER = 200;
  * @returns {{steamid: *, ctf: {elo: number, games: (number|*)}}}
  */
 function generatePlayerObject(player, defaults) {
+
+    //console.log('GGG', player.rank);
+    if (typeof player === 'undefined'){
+        console.log('UNDEFFFFFF');
+        player ={};
+        player.rank = 0;
+    }
     return {
         steamid: player.player_id   || defaults.player_id,
         ctf: {
@@ -64,16 +71,21 @@ router.get('/omega/elo/:ids', function (req, res) {
 
     var players = [];
     var ids = req.params.ids.split('+');
+    ids = _.uniq(ids);
     var IN = ids.join(',');
 
     pool.getConnection(function (err, connection) {
         // Use the connection
-        connection.query("SELECT * FROM player_rank where player_id IN ( " + IN + " )",  function (err, result) {
+        connection.query("SELECT player_id, IF(rank = 0, 1,rank) as rank,  num_games FROM player_rank where player_id IN ( " + IN + " )",  function (err, result) {
 
             var playerIndex = {};
 
+            console.log('ERRRRRRR', err);
+
             // generate response object
             _.each(result, function (player) {
+                console.log('GGGAAAAA',player);
+                console.log('GGGAAAAA',player.rank);
                 var p = generatePlayerObject(player);
                 playerIndex[player.player_id] = true;
                 players.push(p);
