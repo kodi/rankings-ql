@@ -29,26 +29,38 @@ api.loadRemote(date, function (data) {
 
     //var slice = _.slice(data.files, 1153 + 1026 + 700 + 1000, data.files.length);
     var allGames = data.files;
-    //var allGames = slice;
     var l = allGames.length;
+
 
     LoopArray(allGames, {iter :function (file, index) {
 
         LOG.logOk('Processing '+ (index + 1 ) + '/' +l);
 
-        model = new MatchResultsModel();
-        model.loadRemote(date, file)
-            .then(function () {
-                return getRealmServerId(model, connection);
-            })
-            .then(function (serverData) {
-                return processAcceptedMatch(model, serverData, connection);
-            }, function(err) { LOG.logErr(err)})
-            .then(function(){
-                if ((index + 1) >= l){
-                    connection.end();
-                }
-            });
+
+        connection.query("SELECT *  FROM `matches` where game_id = ? ", [file], function(err, results){
+
+            if (results.length > 0) {
+                LOG.logOk('Game ' + file + ' already in DB');
+            } else {
+
+                model = new MatchResultsModel();
+                model.loadRemote(date, file)
+                    .then(function () {
+                        return getRealmServerId(model, connection);
+                    })
+                    .then(function (serverData) {
+                        return processAcceptedMatch(model, serverData, connection);
+                    }, function (err) {
+                        LOG.logErr(err)
+                    })
+                    .then(function () {
+                        if ((index + 1) >= l) {
+                            connection.end();
+                        }
+                    });
+            }
+        });
+
     }, end: function(){
 
     }}, 700, false);
@@ -219,6 +231,8 @@ function getMatchDBStatus(model, dbConn){
 function getRealmServerId(model, dbConnection) {
 
     var df = Q.defer();
+
+
 
     getServerId(model, dbConnection).then(function (serverData) {
 
