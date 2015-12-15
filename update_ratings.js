@@ -1,6 +1,6 @@
 var _ = require("lodash");
 var fs = require("fs");
-var Q = require('Q');
+var Q = require('q');
 var chalk = require('chalk');
 var mysql = require('mysql');
 var M = require('mstring');
