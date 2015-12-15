@@ -80,12 +80,9 @@ router.get('/omega/elo/:ids', function (req, res) {
 
             var playerIndex = {};
 
-            console.log('ERRRRRRR', err);
 
             // generate response object
             _.each(result, function (player) {
-                console.log('GGGAAAAA',player);
-                console.log('GGGAAAAA',player.rank);
                 var p = generatePlayerObject(player);
                 playerIndex[player.player_id] = true;
                 players.push(p);
