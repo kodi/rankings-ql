@@ -139,7 +139,7 @@ function parseServer(gameModel) {
         var insert = {
             dmg : dmg,
             dmgTaken : dmgTaken
-        }
+        };
 
         if (team == 1){
             TEAM_STATS.TEAM_1.push(insert);
