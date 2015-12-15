@@ -1,12 +1,7 @@
-var mysql      = require('mysql');
+var mysql       = require('mysql');
+var Config      = require('../config/config');
 
-var pool = mysql.createPool({
-    connectionLimit : 10,
-    host     : '127.0.0.1',
-    user     : 'root',
-    password : 'd0dct0rwh0',
-    database : 'ratings_test'
-});
+var pool = mysql.createPool(Config.db);
 
 
 module.exports = pool;
