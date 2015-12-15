@@ -32,7 +32,7 @@ api.loadRemote(date, function (data) {
 
     LoopArray(allGames, {iter :function (file, index) {
 
-        LOG.logOk('Processing '+ index + '/' +l);
+        LOG.logOk('Processing '+ (index + 1 ) + '/' +l);
 
         model = new MatchResultsModel();
         model.loadRemote(date, file)
@@ -44,7 +44,6 @@ api.loadRemote(date, function (data) {
             }, function(err) { LOG.logErr(err)})
             .then(function(){
                 if ((index + 1) >= l){
-                    console.log('END');
                     connection.end();
                 }
             });
@@ -62,16 +61,15 @@ function processAcceptedMatch(model, serverData, dbConnection) {
     var df = Q.defer();
     getMatchDBStatus(model, dbConnection)
         .then(function(status){
-
             return insertPlayerDetails(model, serverData, status, dbConnection);
 
-        })
+        }, function(err) { LOG.logErr(err); df.resolve(); })
         .then(function(data){
                 LOG.logOk(data);
                 df.resolve();
         }, function(err) {
             LOG.logErr(err);
-            df.reject(err);
+            df.resolve(err);
         });
 
 
@@ -84,7 +82,7 @@ function insertPlayerDetails(model, serverData, status, dbConn) {
     var df = Q.defer();
 
     if( status !== true){
-        df.reject('not gonna insert this :) ');
+        df.reject('Game Already in DB');
     } else {
 
         var CALC = model.getSummaryDamages();
@@ -194,7 +192,7 @@ function getMatchDBStatus(model, dbConn){
         }
 
         if (data.length > 0) {
-            df.reject('game already in DB');
+            df.resolve(false);
         } else {
             df.resolve(true);
         }
