@@ -5,6 +5,7 @@ var Q = require('q');
 var chalk = require('chalk');
 var mysql = require('mysql');
 var util = require('util');
+var moment = require('moment');
 
 //----------------------------------------------------------
 var MatchResultsModel = require('../lib/MatchResultsModel');
@@ -18,7 +19,8 @@ var LoopArray = require('../lib/arr_loop');
 
 //step 1, read all files
 
-var date = '2015-12-15';
+var date = moment().format('YYYY-MM-DD');
+LOG.logOk("Getting the games for date: " + date);
 var api = new QlstatsApi();
 api.loadRemote(date, function (data) {
 
@@ -37,7 +39,7 @@ api.loadRemote(date, function (data) {
         model = new MatchResultsModel();
         model.loadRemote(date, file)
             .then(function () {
-                return getRealmServerId(model);
+                return getRealmServerId(model, connection);
             })
             .then(function (serverData) {
                 return processAcceptedMatch(model, serverData, connection);
@@ -50,9 +52,6 @@ api.loadRemote(date, function (data) {
     }, end: function(){
 
     }}, 700, false);
-
-
-
 
 });
 
@@ -179,6 +178,13 @@ function extractPlayerDetails(player) {
     return pd;
 }
 
+/**
+ * ----------------------------------------------------------
+ * ----------------------------------------------------------
+ * @param model
+ * @param dbConn
+ * @returns {*|promise}
+ */
 function getMatchDBStatus(model, dbConn){
 
     var guid = model.getGuid();
@@ -203,12 +209,18 @@ function getMatchDBStatus(model, dbConn){
 }
 
 
-
-function getRealmServerId(model) {
+/**
+ * ----------------------------------------------------------
+ * ----------------------------------------------------------
+ * @param {MatchResultsModel} model
+ * @param {mysql.connection} dbConnection
+ * @returns {*|promise}
+ */
+function getRealmServerId(model, dbConnection) {
 
     var df = Q.defer();
 
-    getServerId(model, connection).then(function (serverData) {
+    getServerId(model, dbConnection).then(function (serverData) {
 
         if (typeof serverData.id !== "undefined") {
 
@@ -225,7 +237,8 @@ function getRealmServerId(model) {
 
 
 /**
- *
+ * ----------------------------------------------------------
+ * ----------------------------------------------------------
  * @param {MatchResultsModel} model
  * @param {mysql.connection} dbConnection
  */
