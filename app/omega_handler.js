@@ -204,7 +204,12 @@ router.get('/omega/top100/', function (req, res) {
 
             if (! err) {
 
-                console.log(result);
+
+                var j = 0;
+                _.map(result, function(r){
+                    j++;
+                    return r.position = j;
+                });
                 res.send({data: result});
             }
 
