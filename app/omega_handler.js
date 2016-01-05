@@ -191,7 +191,7 @@ router.get('/omega/top100/', function (req, res) {
 
         // Use the connection
 
-        var QUERY = 'select R.rank, MD.nick, if(old_rank = 0, 0, rank - old_rank) as rank_change, R.num_games FROM `player_rank` as R';
+        var QUERY = 'select R.rank, MD.nick,R.player_id, if(old_rank = 0, 0, rank - old_rank) as rank_change, R.num_games FROM `player_rank` as R';
         QUERY += ' LEFT JOIN ( ';
         QUERY += ' SELECT `player_id`, nick FROM `qlstats_matches_details` as MD ';
         QUERY += ' GROUP BY `player_id` ) as MD ';
