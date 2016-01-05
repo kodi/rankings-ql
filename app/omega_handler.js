@@ -183,4 +183,36 @@ router.get('/omega/seen/:id', function (req, res) {
 });
 
 
+
+router.get('/omega/top100/', function (req, res) {
+
+
+    pool.getConnection(function (err, connection) {
+
+        // Use the connection
+
+        var QUERY = 'select R.rank, MD.nick, if(old_rank = 0, 0, rank - old_rank) as rank_change, R.num_games FROM `player_rank` as R';
+        QUERY += ' LEFT JOIN ( ';
+        QUERY += ' SELECT `player_id`, nick FROM `qlstats_matches_details` as MD ';
+        QUERY += ' GROUP BY `player_id` ) as MD ';
+        QUERY += ' ON MD.`player_id` = R.`player_id` ';
+        QUERY += ' WHERE num_games > 10 ';
+        QUERY += ' ORDER BY R.`rank` DESC ';
+        QUERY += ' LIMIT 0,100; ';
+
+        connection.query(QUERY,  function (err, result) {
+
+            if (! err) {
+
+                console.log(result);
+                res.send({data: result});
+            }
+
+            connection.release();
+
+        });
+    });
+});
+
+
 module.exports = router;
