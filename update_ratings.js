@@ -107,7 +107,7 @@ function insertRatings(RES, connection) {
         }
 
         var INSERT_Q = 'INSERT INTO `player_rank` (`rank`, `num_games`, `player_id`) VALUES (?, ?, ?)';
-        var UPDATE_Q = 'UPDATE `player_rank` SET `rank`=?, `num_games`=? WHERE `player_id`=? ';
+        var UPDATE_Q = 'UPDATE `player_rank` SET `rank`=?, `num_games`=?, `rank_change`=? WHERE `player_id`=? ';
 
         var query = INSERT_Q;
         var action = 'inserted';
@@ -120,15 +120,20 @@ function insertRatings(RES, connection) {
                 player.rating = 0;
             }
 
+            var VALUES = [rating, player.num_games, player.id];
+
             if (typeof  data[0] !== 'undefined') {
                 query = UPDATE_Q;
                 action = 'updated';
                 extra = " (was: " + chalk.yellow(data[0].rank) + ") ";
+
+                VALUES = [rating, player.num_games, data[0].rank, player.id];
+
             }
 
             if(action === 'inserted'  || ( action === 'updated' && data[0].rank != player.rating)) {
                 //if rank changed or new player - update
-                connection.query(query, [rating, player.num_games, player.id])
+                connection.query(query, VALUES)
                     .on('end', function () {
                         console.log(action + " rating " + chalk.green(player.rating) + extra + " for player: " + chalk.red(player.nick));
                         deferred.resolve();
