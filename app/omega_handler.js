@@ -112,6 +112,40 @@ router.get('/omega/elo/:ids', function (req, res) {
     });
 });
 
+router.get('/omega/last_game/:id', function (req, res) {
+
+    var ids = req.params.id;
+
+    pool.getConnection(function (err, connection) {
+        var QUERY = "select damage_given, damage_taken, date, nick,score, cap, assist, defend, IF(win=0,'loss','win') as win from `qlstats_matches_details`";
+        QUERY += " where `player_id` = ? ";
+        QUERY += "ORDER BY `date` DESC ";
+        QUERY += " LIMIT 0, 1 ";
+
+
+        connection.query(QUERY, [ids], function (err, result) {
+
+            if (! err) {
+                var start = moment.unix(result[0].date);
+                var end = moment();
+                var diff = moment.duration(end - start).humanize();
+
+                var out = {};
+                out.gid = result[0].game_id;
+                out.last_game_relative = diff;
+                out.last_game_end_timestamp = result[0].date;
+                out.game_details = result[0]
+
+                res.send({data: out});
+            }
+
+            connection.release();
+
+        });
+
+    });
+
+});
 router.get('/omega/seen/:id', function (req, res) {
 
     var ids = req.params.id;
@@ -123,9 +157,8 @@ router.get('/omega/seen/:id', function (req, res) {
 
         var QUERY = 'select `date`, `game_id`,`nick` from `qlstats_matches_details` ';
         QUERY += 'WHERE `player_id` = ? ';
-
         QUERY += 'ORDER BY `date` DESC ';
-        QUERY += 'LIMIT 0,1';
+        QUERY += 'LIMIT 0, 1';
 
 
         connection.query(QUERY, [ids], function (err, result) {
@@ -134,7 +167,6 @@ router.get('/omega/seen/:id', function (req, res) {
                 var start = moment.unix(result[0].date);
                 var end = moment();
                 var diff = moment.duration(end - start).humanize();
-
                 var out = {};
                 out.gid = result[0].game_id;
                 out.last_game_relative = diff;
