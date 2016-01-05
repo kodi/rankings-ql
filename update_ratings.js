@@ -107,7 +107,7 @@ function insertRatings(RES, connection) {
         }
 
         var INSERT_Q = 'INSERT INTO `player_rank` (`rank`, `num_games`, `player_id`) VALUES (?, ?, ?)';
-        var UPDATE_Q = 'UPDATE `player_rank` SET `rank`=?, `num_games`=?, `rank_change`=? WHERE `player_id`=? ';
+        var UPDATE_Q = 'UPDATE `player_rank` SET `rank`=?, `num_games`=?, `old_rank`=? WHERE `player_id`=? ';
 
         var query = INSERT_Q;
         var action = 'inserted';
