@@ -146,8 +146,8 @@ function insertPlayerData(data, dbConnection) {
 
     var df = Q.defer();
 
-    dbConnection.query('INSERT INTO `qlstats_matches_details` (`damage_given`, `damage_taken`,`score`,`time`,`win`, `player_id`, `game_id`, `date`,`nick`, `damage_given_adjusted`) values(?,?,?,?,?,?,?,?,?,?)',
-        [data.dmg, data.dmgTaken, data.score, data.playTime, data.win, data.playerId, data.gameID, data.date, data.nick, data.adjustedDamage],
+    dbConnection.query('INSERT INTO `qlstats_matches_details` (`damage_given`, `damage_taken`,`score`,`time`,`win`, `player_id`, `game_id`, `date`,`nick`, `damage_given_adjusted`,`cap`,`assist`,`defend`) values(?,?,?,?,?,?,?,?,?,?,?,?,?)',
+        [data.dmg, data.dmgTaken, data.score, data.playTime, data.win, data.playerId, data.gameID, data.date, data.nick, data.adjustedDamage, data.cap, data.assist, data.defend],
         function(err, results) {
             if (! err) {
                 df.resolve();
