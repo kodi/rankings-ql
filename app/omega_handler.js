@@ -113,7 +113,7 @@ router.get('/omega/elo/:ids', function (req, res) {
 });
 
 router.get('/omega/last_game/:id', function (req, res) {
-
+    logger.logRequest(req);
     var ids = req.params.id;
 
     pool.getConnection(function (err, connection) {
@@ -147,7 +147,7 @@ router.get('/omega/last_game/:id', function (req, res) {
 
 });
 router.get('/omega/seen/:id', function (req, res) {
-
+    logger.logRequest(req);
     var ids = req.params.id;
 
     pool.getConnection(function (err, connection) {
@@ -185,7 +185,7 @@ router.get('/omega/seen/:id', function (req, res) {
 
 
 router.get('/omega/top100/', function (req, res) {
-
+    logger.logRequest(req);
 
     pool.getConnection(function (err, connection) {
 
