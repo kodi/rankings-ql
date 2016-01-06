@@ -37,3 +37,14 @@ exports.logOk = function(msg){
 };
 
 
+exports.logInfo = function(msg){
+
+    var dt = datetime.create(Date.now());
+    var formatted = dt.format('Y-m-d H:M:S');
+    var message = "[" + chalk.white(formatted) + "] ";
+    message += chalk.blue(util.inspect(msg));
+    console.log(message);
+
+};
+
+
