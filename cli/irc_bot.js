@@ -114,6 +114,9 @@ IrcBot.prototype.getElo = function(cb, arg, from){
             var elo = body.players[0].ctf.elo;
             var num_games = body.players[0].ctf.games;
             var elo_change = body.players[0].ctf.elo_change;
+            if (elo_change > 0) {
+                elo_change = '+' + elo_change;
+            }
 
             var msg = irc.colors.wrap('gray','ELO: ');
             msg += irc.colors.wrap('dark_green',elo);
@@ -127,7 +130,16 @@ IrcBot.prototype.getElo = function(cb, arg, from){
 };
 
 
+IrcBot.prototype.cleanNick = function(nick) {
+
+        return nick.split(new RegExp('[(^1),(^2),(^3),(^4),(^5),(^6),(^7),(^8),(^9),]', 'g')).join('');
+
+};
+
+
 IrcBot.prototype.getSeen = function(cb, arg, from){
+
+    var self = this;
 
     if (arg !== null){
         var steamId = arg;
@@ -146,8 +158,8 @@ IrcBot.prototype.getSeen = function(cb, arg, from){
                 var seenTime = body.data.last_game_relative;
                 var seenNick = body.data.last_nick;
 
-                var msg = irc.colors.wrap('gray', 'last seen as ');
-                msg += irc.colors.wrap('dark_green', seenNick);
+                var msg = irc.colors.wrap('gray', 'last seen as: ');
+                msg += irc.colors.wrap('dark_green', self.cleanNick(seenNick));
                 msg += irc.colors.wrap('light_green', ' (' + seenTime + ' ago)');
                 cb(msg);
             }
