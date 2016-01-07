@@ -158,9 +158,12 @@ IrcBot.prototype.getSeen = function(cb, arg, from){
                 var seenTime = body.data.last_game_relative;
                 var seenNick = body.data.last_nick;
 
+                var gid = body.data.gid;
+
                 var msg = irc.colors.wrap('gray', 'last seen as: ');
                 msg += irc.colors.wrap('dark_green', self.cleanNick(seenNick));
                 msg += irc.colors.wrap('light_green', ' (' + seenTime + ' ago)');
+                msg += irc.colors.wrap('gray', ' [game details: http://qlstats.net:8080/game/' + gid + ' ]');
                 cb(msg);
             }
         }
