@@ -163,7 +163,7 @@ router.get('/omega/seen/:id', function (req, res) {
 
         connection.query(QUERY, [ids], function (err, result) {
 
-            if (! err) {
+            if (! err && result.length > 0) {
                 var start = moment.unix(result[0].date);
                 var end = moment();
                 var diff = moment.duration(end - start).humanize();
@@ -174,6 +174,8 @@ router.get('/omega/seen/:id', function (req, res) {
                 out.last_game_end_timestamp = result[0].date;
 
                 res.send({data: out});
+            } else {
+                res.send({data: 'error'});
             }
 
             connection.release();
