@@ -160,11 +160,11 @@ IrcBot.prototype.getSeen = function(cb, arg, from){
 
                 var gid = body.data.gid;
 
-                var msg = irc.colors.wrap('gray', 'last seen as: ');
-                msg += irc.colors.wrap('dark_green', self.cleanNick(seenNick));
-                msg += irc.colors.wrap('light_green', ' (' + seenTime + ' ago)');
-                msg += irc.colors.wrap('gray', ' [game details: http://qlstats.net:8080/game/' + gid + ' ]');
-                cb(msg);
+                var message = irc.colors.wrap('gray', 'last seen as: ');
+                message += irc.colors.wrap('dark_green', self.cleanNick(seenNick));
+                message += irc.colors.wrap('light_green', ' (' + seenTime + ' ago)');
+                message += irc.colors.wrap('gray', ' [game details: http://qlstats.net:8080/game/' + gid + ' ]');
+                cb(message);
             }
         }
     );
