@@ -135,7 +135,7 @@ IrcBot.prototype.getMessage = function (from, to, text, message, cb) {
             return;
 
         case '!seen':
-            this.getSeen(cb, arg, from);
+            this.getSeen(cb, arg.trim(), from);
             return;
 
         case '!iam':
@@ -154,7 +154,7 @@ IrcBot.prototype.getMessage = function (from, to, text, message, cb) {
 IrcBot.prototype.getIam = function(cb, arg, from){
     var self = this;
     if (arg !== null){
-        var steamId = arg;
+        var steamId = arg.trim();
     } else {
         cb('please provide steam id');
         return;
