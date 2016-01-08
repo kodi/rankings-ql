@@ -12,10 +12,7 @@ var CONFIG = require('../config/config');
  * @namespace IRC_CONFIG
  */
 var IRC_CONFIG = {
-    channels: [
-        '#gibstars'
-        ,'#omega123'
-    ],
+    channels: ['#gibstars','#omega123'],
     server: "se.quakenet.org",
     botName: "[omega-bot]"
 };
@@ -176,7 +173,7 @@ IrcBot.prototype.getIam = function(cb, arg, from){
 
             if (!err) {
                self.getIrcNicks()
-                   .then(function(players){
+                   .then(function(){
                        cb( from +' is now mapped to ' + steamId);
                    });
 
