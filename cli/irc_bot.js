@@ -1,7 +1,9 @@
 var irc = require("irc");
 var LOG = require('../app/log');
 var request = require('request');
+var pool = require('../app/db');
 var Q = require('q');
+var _ = require('lodash');
 //---------------------------------------------------------- local
 var CONFIG = require('../config/config');
 
@@ -12,7 +14,7 @@ var CONFIG = require('../config/config');
 var IRC_CONFIG = {
     channels: [
         '#gibstars'
-        ,'#omega123'
+        //,'#omega123'
     ],
     server: "se.quakenet.org",
     botName: "[omega-bot]"
@@ -33,6 +35,41 @@ var IrcBot = function(options){
     this.options = options;
 
     this.bot = null;
+
+    this.IRC_NICKS = null;
+};
+
+IrcBot.prototype.getIrcNicks = function(){
+
+    var df = Q.defer();
+
+    var self = this;
+
+
+    pool.getConnection(function (err, connection) {
+
+        connection.query("SELECT * from `players` ", function(err, data){
+
+            if (!err) {
+                self.IRC_NICKS = {};
+                self.IRC_IDS = {};
+                _.each(data, function(row){
+                    self.IRC_NICKS[row.irc_nick] = row.player_id;
+                    self.IRC_IDS[row.player_id] = row.irc_nick;
+                });
+
+                df.resolve(self.IRC_NICKS);
+            } else {
+                df.reject('cannot get players');
+            }
+
+        });
+
+    });
+
+
+    return df.promise;
+
 };
 
 /**
@@ -40,12 +77,25 @@ var IrcBot = function(options){
  * ----------------------------------------------------------
  */
 IrcBot.prototype.connect = function(){
+    var self = this;
 
-    this.bot = new irc.Client(this.options.IRC_CONFIG.server, this.options.IRC_CONFIG.botName, {
-        channels: this.options.IRC_CONFIG.channels
-    });
+    this.getIrcNicks()
+        .then(function(players){
 
-    this.addListeners();
+            LOG.logInfo('got players');
+            LOG.logOk(players);
+
+            self.bot = new irc.Client(self.options.IRC_CONFIG.server, self.options.IRC_CONFIG.botName, {
+                channels: self.options.IRC_CONFIG.channels
+            });
+
+            self.addListeners();
+
+        }, function(err){
+            LOG.logErr(err);
+        });
+
+
 
 };
 
@@ -88,6 +138,11 @@ IrcBot.prototype.getMessage = function (from, to, text, message, cb) {
             this.getSeen(cb, arg, from);
             return;
 
+        case '!iam':
+            this.getIam(cb, arg, from);
+            return;
+
+
         default:
             cb('');
 
@@ -95,8 +150,46 @@ IrcBot.prototype.getMessage = function (from, to, text, message, cb) {
 
 };
 
-IrcBot.prototype.getElo = function(cb, arg, from){
 
+IrcBot.prototype.getIam = function(cb, arg, from){
+    var self = this;
+    if (arg !== null){
+        var steamId = arg;
+    } else {
+        cb('please provide steam id');
+        return;
+    }
+
+
+    pool.getConnection(function (err, connection) {
+
+
+        LOG.logOk('setting steam id ' + steamId);
+
+        connection.query('INSERT INTO `players` (`player_id`,`irc_nick`) VALUES(?, ?)', [steamId, from], function(err, data){
+            LOG.logErr(err);
+            LOG.logOk(data);
+
+            if (!err) {
+               self.getIrcNicks()
+                   .then(function(players){
+                       cb( from +' is now mapped to ' + steamId);
+                   });
+
+            } else {
+                cb('IRC username or SteamID already in database');
+            }
+
+            connection.release();
+
+        });
+
+
+    });
+
+};
+
+IrcBot.prototype.getElo = function(cb, arg, from){
 
 
     if (arg !== null){
@@ -136,17 +229,40 @@ IrcBot.prototype.cleanNick = function(nick) {
 
 };
 
+IrcBot.prototype.getSteamIdFromIdOrNick = function(id) {
+
+    if (id === null) {
+        return id;
+    } else {
+        var match = id.match(/^[0-9]{17}$/);
+        if (match === null){
+            if(typeof this.IRC_NICKS[id] === 'undefined'){
+
+                return null;
+            } else {
+                return this.IRC_NICKS[id];
+            }
+        } else {
+            return id;
+        }
+    }
+
+};
 
 IrcBot.prototype.getSeen = function(cb, arg, from){
 
     var self = this;
+    var steamId = this.getSteamIdFromIdOrNick(arg);
 
-    if (arg !== null){
-        var steamId = arg;
-    } else {
-        cb('no steam id/nick provided');
+    if(arg === null) {
+        cb('player id or nick not provided');
         return;
     }
+    if (steamId === null){
+        cb('unknown player, he must do !iam <steam64ID> first');
+        return;
+    }
+
 
     var url = API_URL + '/seen/' + steamId;
 
@@ -157,7 +273,6 @@ IrcBot.prototype.getSeen = function(cb, arg, from){
             } else {
                 var seenTime = body.data.last_game_relative;
                 var seenNick = body.data.last_nick;
-
                 var gid = body.data.gid;
 
                 var message = irc.colors.wrap('gray', 'last seen as: ');
