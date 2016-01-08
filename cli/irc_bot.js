@@ -134,12 +134,16 @@ IrcBot.prototype.getMessage = function (from, to, text, message, cb) {
             this.getElo(cb, arg, from);
             return;
 
+        case '!rating':
+            this.getElo(cb, arg, from);
+            return;
+
         case '!seen':
             this.getSeen(cb, arg.trim(), from);
             return;
 
         case '!iam':
-            this.getIam(cb, arg, from);
+            this.getIam(cb, arg.trim(), from);
             return;
 
 
@@ -191,13 +195,29 @@ IrcBot.prototype.getIam = function(cb, arg, from){
 
 IrcBot.prototype.getElo = function(cb, arg, from){
 
+    var steamId;
+    var nick;
 
-    if (arg !== null){
-        var steamId = arg;
+    if (arg === null){
+
+        steamId = this.getSteamIdFromIdOrNick(from);
+        nick = from;
+
+        if (steamId === null){
+            cb('you must do !iam <steam64ID> first');
+            return;
+        }
     } else {
-        cb('no steam id provided');
-        return;
+        steamId = this.getSteamIdFromIdOrNick(arg);
+        nick = arg;
+        if (steamId === null){
+            cb('unknown player, he must do !iam <steam64ID> first');
+            return;
+        }
     }
+
+
+
 
     var url = API_URL + '/elo/' + steamId;
 
@@ -211,7 +231,7 @@ IrcBot.prototype.getElo = function(cb, arg, from){
                 elo_change = '+' + elo_change;
             }
 
-            var msg = irc.colors.wrap('gray','ELO: ');
+            var msg = irc.colors.wrap('gray', nick + ': ');
             msg += irc.colors.wrap('dark_green',elo);
             msg += irc.colors.wrap('light_green','(' + elo_change + ')');
             msg += irc.colors.wrap('gray',' [' + num_games + ' games]');
