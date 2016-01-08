@@ -14,7 +14,7 @@ var CONFIG = require('../config/config');
 var IRC_CONFIG = {
     channels: [
         '#gibstars'
-        //,'#omega123'
+        ,'#omega123'
     ],
     server: "se.quakenet.org",
     botName: "[omega-bot]"
