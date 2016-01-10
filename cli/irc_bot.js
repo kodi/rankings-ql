@@ -138,11 +138,11 @@ IrcBot.prototype.getMessage = function (from, to, text, message, cb) {
             return;
 
         case '!seen':
-            this.getSeen(cb, arg.trim(), from);
+            this.getSeen(cb, arg, from);
             return;
 
         case '!iam':
-            this.getIam(cb, arg.trim(), from);
+            this.getIam(cb, arg, from);
             return;
 
 
@@ -270,13 +270,15 @@ IrcBot.prototype.getSteamIdFromIdOrNick = function(id) {
 
 IrcBot.prototype.getSeen = function(cb, arg, from){
 
-    var self = this;
-    var steamId = this.getSteamIdFromIdOrNick(arg);
-
     if(arg === null) {
         cb('player id or nick not provided');
         return;
     }
+
+    var self = this;
+    var steamId = this.getSteamIdFromIdOrNick(arg.trim());
+
+
     if (steamId === null){
         cb('unknown player, he must do !iam <steam64ID> first');
         return;
