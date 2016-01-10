@@ -299,7 +299,7 @@ IrcBot.prototype.getSeen = function(cb, arg, from){
                 var message = irc.colors.wrap('gray', 'last seen as: ');
                 message += irc.colors.wrap('dark_green', self.cleanNick(seenNick));
                 message += irc.colors.wrap('light_green', ' (' + seenTime + ' ago)');
-                message += irc.colors.wrap('gray', ' [game details: http://qlstats.net:8080/game/' + gid + ' ]');
+                message += irc.colors.wrap('gray', ' [game details: http://qlstats.net/game/' + gid + ' ]');
                 cb(message);
             }
         }
