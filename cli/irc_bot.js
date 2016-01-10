@@ -12,7 +12,9 @@ var CONFIG = require('../config/config');
  * @namespace IRC_CONFIG
  */
 var IRC_CONFIG = {
-    channels: ['#gibstars','#omega123'],
+    channels: ['#gibstars'
+        ,'#omega123'
+        ,'#omega'],
     server: "se.quakenet.org",
     botName: "[omega-bot]"
 };
