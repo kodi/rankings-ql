@@ -14,7 +14,8 @@ var CONFIG = require('../config/config');
 var IRC_CONFIG = {
     channels: ['#gibstars'
         ,'#omega123'
-        ,'#omega'],
+        ,'#omega'
+        ],
     server: "se.quakenet.org",
     botName: "[omega-bot]"
 };
@@ -53,8 +54,8 @@ IrcBot.prototype.getIrcNicks = function(){
                 self.IRC_NICKS = {};
                 self.IRC_IDS = {};
                 _.each(data, function(row){
-                    self.IRC_NICKS[row.irc_nick] = row.player_id;
-                    self.IRC_IDS[row.player_id] = row.irc_nick;
+                    self.IRC_NICKS[row.irc_nick.toLowerCase()] = row.player_id;
+                    self.IRC_IDS[row.player_id] = row.irc_nick.toLowerCase();
                 });
 
                 df.resolve(self.IRC_NICKS);
@@ -255,11 +256,11 @@ IrcBot.prototype.getSteamIdFromIdOrNick = function(id) {
     } else {
         var match = id.match(/^[0-9]{17}$/);
         if (match === null){
-            if(typeof this.IRC_NICKS[id] === 'undefined'){
+            if(typeof this.IRC_NICKS[id.toLowerCase()] === 'undefined'){
 
                 return null;
             } else {
-                return this.IRC_NICKS[id];
+                return this.IRC_NICKS[id.toLowerCase()];
             }
         } else {
             return id;
