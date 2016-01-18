@@ -143,11 +143,42 @@ IrcBot.prototype.getMessage = function (from, to, text, message, cb) {
             this.getIam(cb, arg, from);
             return;
 
+        case '!top10':
+
+            this.getTop10(cb, arg, from);
+            return;
+
 
         default:
             cb('');
 
     }
+
+};
+
+
+IrcBot.prototype.getTop10 = function(cb, arg, from){
+
+    var period = null;
+    var self = this;
+
+    if (arg !== null){
+         period = arg.trim().toLowerCase();
+    } else {
+        cb('please provide period: day/week/month');
+        return;
+    }
+
+    if (['week','day','month'].indexOf(period) === -1) {
+        cb('invalid period use: day/week/month')
+    }
+
+
+    pool.getConnection(function (err, connection) {
+
+
+    });
+
 
 };
 

@@ -19,10 +19,11 @@ var LoopArray = require('../lib/arr_loop');
 
 //step 1, read all files
 
-var date = moment().format('YYYY-MM-DD');
+//var date = moment().format('YYYY-MM-DD');
+var date = '2016-01-17';
 LOG.logOk("Getting the games for date: " + date);
 var api = new QlstatsApi();
-api.loadRemote(date, function (data) {
+api.getAllData(date, function (data) {
 
 
     var model = new MatchResultsModel();
@@ -30,7 +31,6 @@ api.loadRemote(date, function (data) {
     //var slice = _.slice(data.files, 1153 + 1026 + 700 + 1000, data.files.length);
     var allGames = data.files;
     var l = allGames.length;
-
 
     LoopArray(allGames, {iter :function (file, index) {
 
