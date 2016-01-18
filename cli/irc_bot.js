@@ -13,8 +13,8 @@ var CONFIG = require('../config/config');
  */
 var IRC_CONFIG = {
     channels: CONFIG.irc.channels,
-    server: "se.quakenet.org",
-    botName: "[omega-bot]"
+    server: "fi.quakenet.org",
+    botName: CONFIG.irc.nick
 };
 
 
@@ -141,6 +141,13 @@ IrcBot.prototype.getMessage = function (from, to, text, message, cb) {
 
         case '!iam':
             this.getIam(cb, arg, from);
+            return;
+        case '!last':
+            this.getLast(cb, arg, from);
+            return;
+
+        case '!l':
+            this.getLast(cb, arg, from);
             return;
 
         case '!top10':
@@ -296,6 +303,86 @@ IrcBot.prototype.getSteamIdFromIdOrNick = function(id) {
     }
 
 };
+
+IrcBot.prototype.getLast = function(cb, arg, from){
+
+    var steamId;
+    var nick;
+    var self = this;
+
+    if (arg === null){
+
+        steamId = this.getSteamIdFromIdOrNick(from);
+        nick = from;
+
+        if (steamId === null){
+            cb('you must do !iam <steam64ID> first');
+            return;
+        }
+    } else {
+        steamId = this.getSteamIdFromIdOrNick(arg);
+        nick = arg;
+        if (steamId === null){
+            cb('unknown player, he must do !iam <steam64ID> first');
+            return;
+        }
+    }
+
+
+    pool.getConnection(function (err, connection) {
+
+        var Q = "SELECT ";
+
+        Q += " IF(win=0,'LOST', 'WON') as g_win, damage_given, `damage_taken`, nick, `date` as game_date, game_id, cap, assist, defend ";
+        Q += ", (rank - old_rank) as rank";
+        Q += " from `qlstats_matches_details`  as MD";
+
+        Q += " LEFT JOIN `player_rank` as PR";
+        Q += " ON PR.`player_id` = MD.`player_id` ";
+        Q += " WHERE MD.`player_id`=? ";
+        Q += " ORDER BY `date` DESC ";
+        Q += " LIMIT 0,1 ";
+
+        connection.query(Q, [steamId],function(err, result){
+            console.log(err);
+            console.log(result);
+
+            if( !err && result.length > 0) {
+
+                var row = result[0];
+                var msg = '';
+
+                var msg = irc.colors.wrap('gray', 'played as: ');
+
+                var elo_change = row.rank;
+
+                if (elo_change > 0) {
+                    elo_change = '+' + elo_change;
+                }
+
+
+                msg += irc.colors.wrap('dark_green', self.cleanNick(row.nick));
+                msg += irc.colors.wrap('cyan', ' ( ' + row.g_win + ' | ' + elo_change + ')'  );
+                msg += irc.colors.wrap('dark_blue', ' [dmg/taken: ' + row.damage_given + '/' + row.damage_taken + ']'  );
+                msg += irc.colors.wrap('cyan', ' [cap/assist/defend: ' + row.cap + '/' + row.assist + '/' + row.defend +']'  );
+                msg += irc.colors.wrap('gray', ' [report: http://qlstats.net/game/' + row.game_id + ' ]');
+
+
+                cb(msg);
+
+
+            } else {
+                cb('something went wrong :(');
+            }
+
+        });
+
+    });
+
+
+
+};
+
 
 IrcBot.prototype.getSeen = function(cb, arg, from){
 

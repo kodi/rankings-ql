@@ -1,6 +1,7 @@
 module.exports = {
     irc: {
         channels : [],
+        nick : '[omega-bot]',
         pass : '-------------'
     },
     db: {
