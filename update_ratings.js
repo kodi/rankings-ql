@@ -141,7 +141,7 @@ function insertRatings(RES, connection) {
 
             } else {
                 //nothing changed, skip
-                console.log("no change for player: " + chalk.red(player.nick));
+                //console.log("no change for player: " + chalk.red(player.nick));
                 deferred.resolve();
             }
 
