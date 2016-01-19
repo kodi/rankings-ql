@@ -32,42 +32,48 @@ api.getAllData(date, function (data) {
     var allGames = data.files;
     var l = allGames.length;
 
-    LoopArray(allGames, {iter :function (file, index) {
+    if (l > 0) {
 
-        LOG.logOk('Processing '+ (index + 1 ) + '/' +l);
+        LoopArray(allGames, {
+            iter: function (file, index) {
+
+                LOG.logOk('Processing ' + (index + 1 ) + '/' + l);
 
 
-        connection.query("SELECT *  FROM `matches` where game_id = ? ", [file], function(err, results){
+                connection.query("SELECT *  FROM `matches` where game_id = ? ", [file], function (err, results) {
 
-            if (results.length > 0) {
-                LOG.logOk('Game ' + file + ' already in DB');
-                if ((index + 1) >= l) {
-                    connection.end()
-                }
-            } else {
-
-                model = new MatchResultsModel();
-                model.loadRemote(date, file)
-                    .then(function () {
-                        return getRealmServerId(model, connection);
-                    })
-                    .then(function (serverData) {
-                        return processAcceptedMatch(model, serverData, connection);
-                    }, function (err) {
-                        LOG.logErr(err)
-                    })
-                    .then(function () {
+                    if (results.length > 0) {
+                        LOG.logOk('Game ' + file + ' already in DB');
                         if ((index + 1) >= l) {
-                            connection.end();
+                            connection.end()
                         }
-                    });
+                    } else {
+
+                        model = new MatchResultsModel();
+                        model.loadRemote(date, file)
+                            .then(function () {
+                                return getRealmServerId(model, connection);
+                            })
+                            .then(function (serverData) {
+                                return processAcceptedMatch(model, serverData, connection);
+                            }, function (err) {
+                                LOG.logErr(err)
+                            })
+                            .then(function () {
+                                if ((index + 1) >= l) {
+                                    connection.end();
+                                }
+                            });
+                    }
+                });
+
+            }, end: function () {
+
             }
-        });
-
-    }, end: function(){
-
-    }}, 500, false);
-
+        }, 500, false);
+    } else {
+        LOG.logErr('NO GAMES YET!');
+    }
 });
 
 
