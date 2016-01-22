@@ -198,7 +198,7 @@ router.get('/omega/top100/', function (req, res) {
         QUERY += ' SELECT `player_id`, nick FROM `qlstats_matches_details` as MD ';
         QUERY += ' GROUP BY `player_id` ) as MD ';
         QUERY += ' ON MD.`player_id` = R.`player_id` ';
-        QUERY += ' WHERE num_games > 10 ';
+        QUERY += ' WHERE num_games >= 10 ';
         QUERY += ' ORDER BY R.`rank` DESC ';
         QUERY += ' LIMIT 0,100; ';
 
