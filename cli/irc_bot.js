@@ -239,14 +239,14 @@ IrcBot.prototype.getElo = function(cb, arg, from){
         nick = from;
 
         if (steamId === null){
-            cb('you must do !iam <steam64ID> first (https://steamid.io)');
+            cb('you must do !iam <steam64ID> first (find your id here: https://steamid.io)');
             return;
         }
     } else {
         steamId = this.getSteamIdFromIdOrNick(arg);
         nick = arg;
         if (steamId === null){
-            cb('unknown player, he must do !iam <steam64ID> first (https://steamid.io)');
+            cb('unknown player, he must do !iam <steam64ID> first (find your id here: https://steamid.io)');
             return;
         }
     }
@@ -316,14 +316,14 @@ IrcBot.prototype.getLast = function(cb, arg, from){
         nick = from;
 
         if (steamId === null){
-            cb('you must do !iam <steam64ID> first (https://steamid.io)');
+            cb('you must do !iam <steam64ID> first (find your id here: https://steamid.io)');
             return;
         }
     } else {
         steamId = this.getSteamIdFromIdOrNick(arg);
         nick = arg;
         if (steamId === null){
-            cb('unknown player, he must do !iam <steam64ID> first (https://steamid.io)');
+            cb('unknown player, he must do !iam <steam64ID> first (find your id here: https://steamid.io)');
             return;
         }
     }
@@ -396,7 +396,7 @@ IrcBot.prototype.getSeen = function(cb, arg, from){
 
 
     if (steamId === null){
-        cb('unknown player, he must do !iam <steam64ID> first (https://steamid.io)');
+        cb('unknown player, he must do !iam <steam64ID> first (find your id here: https://steamid.io)');
         return;
     }
 
