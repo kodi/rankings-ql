@@ -134,7 +134,7 @@ router.get('/omega/last_game/:id', function (req, res) {
                 out.gid = result[0].game_id;
                 out.last_game_relative = diff;
                 out.last_game_end_timestamp = result[0].date;
-                out.game_details = result[0]
+                out.game_details = result[0];
 
                 res.send({data: out});
             }
