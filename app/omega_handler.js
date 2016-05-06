@@ -8,7 +8,7 @@ var moment = require('moment');
 
 var router = express.Router();              // get an instance of the express Router
 
-var LOWER_CAP = 250;
+var LOWER_CAP = 150;
 var UPPER_CAP = 650;
 var NEW_PLAYER = 150;
 
