@@ -30,8 +30,7 @@ if (program.date) {
     date = program.date;
     console.log('Overriding date to ' + date);
 }
-process.exit();
-//var date = '2016-01-17';
+
 LOG.logOk("Getting the games for date: " + date);
 var api = new QlstatsApi();
 api.getAllData(date, function (data) {
