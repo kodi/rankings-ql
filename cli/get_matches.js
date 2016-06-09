@@ -19,7 +19,18 @@ var LoopArray = require('../lib/arr_loop');
 
 //step 1, read all files
 
+var program = require('commander');
+
+program.version('0.0.1')
+    .option('-d, --date <s>', 'Do update for specific date')
+    .parse(process.argv);
+
 var date = moment().format('YYYY-MM-DD');
+if (program.date) {
+    date = program.date;
+    console.log('Overriding date to ' + date);
+}
+process.exit();
 //var date = '2016-01-17';
 LOG.logOk("Getting the games for date: " + date);
 var api = new QlstatsApi();
