@@ -80,7 +80,7 @@ api.getAllData(date, function (data) {
             }, end: function () {
 
             }
-        }, 500, false);
+        }, 900, false);
     } else {
         LOG.logErr('NO GAMES YET!');
     }
